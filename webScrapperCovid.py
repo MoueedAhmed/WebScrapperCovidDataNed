@@ -2,12 +2,13 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import pandas as pd
+import sys
 
 dataComplete = []
 startPatientId = 1
 endPatientId = 1
-cookieId = input("Cookie Id: ")
-
+# cookieId = input("Cookie Id: ")
+cookieId = "ci_session=9c3eevklbn3uevp966vh7c7m67ulb50d"
 
 def fetchPatientData(id):
     print("\nFetching data of Patient ID: " + str(id))
@@ -101,8 +102,8 @@ with requests.Session() as s:
     isNotValidInput = True
     while isNotValidInput:
         try:
-            startPatientId = input("Enter starting Patient ID: ")
-            endPatientId = input("Enter ending Patient ID: ")
+            startPatientId = sys.argv[1]
+            endPatientId = sys.argv[2]
             startPatientId = int(startPatientId)
             endPatientId = int(endPatientId)
             isNotValidInput = False
