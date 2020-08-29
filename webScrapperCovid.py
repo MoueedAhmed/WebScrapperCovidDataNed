@@ -126,6 +126,6 @@ f = open(f"dataFrom{startPatientId}to{endPatientId}.json", "w")
 f.write(json.dumps(dataComplete))
 f.close()
 
-df = pd.read_json(f"dataFrom{startPatientId}to{endPatientId}.json")
+df = pd.read_json("dataFrom"+startPatientId+"to"+endPatientId+".json")
 df.to_excel(f"dataFrom{startPatientId}to{endPatientId}.xlsx", index = False)
 
