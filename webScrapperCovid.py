@@ -7,8 +7,8 @@ import sys
 dataComplete = []
 startPatientId = 1
 endPatientId = 1
-# cookieId = input("Cookie Id: ")
-cookieId = "ci_session=9c3eevklbn3uevp966vh7c7m67ulb50d"
+cookieId = "ci_session="+sys.argv[3]
+#cookieId = "ci_session=9c3eevklbn3uevp966vh7c7m67ulb50d"
 
 def fetchPatientData(id):
     print("\nFetching data of Patient ID: " + str(id))
