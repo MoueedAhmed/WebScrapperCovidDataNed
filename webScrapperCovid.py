@@ -122,10 +122,10 @@ with requests.Session() as s:
     print("\nComplete Data Below:\n", dataComplete)
 
 # Write to file
-f = open("dataFrom"+startPatientId+"to"+endPatientId+".json", "w")
+f = open("dataFrom"+str(startPatientId)+"to"+str(endPatientId)+".json", "w")
 f.write(json.dumps(dataComplete))
 f.close()
 
-df = pd.read_json("dataFrom"+startPatientId+"to"+endPatientId+".json")
-df.to_excel("dataFrom"+startPatientId+"to"+endPatientId+".xlsx", index = False)
+df = pd.read_json("dataFrom"+str(startPatientId)+"to"+str(endPatientId)+".json")
+df.to_excel("dataFrom"+str(startPatientId)+"to"+str(endPatientId)+".xlsx", index = False)
 
