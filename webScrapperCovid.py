@@ -2,89 +2,116 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import pandas as pd
-import sys
-
-dataComplete = []
-startPatientId = 1
-endPatientId = 1
-cookieId = "ci_session="+sys.argv[3]
-#cookieId = "ci_session=9c3eevklbn3uevp966vh7c7m67ulb50d"
 
 def fetchPatientData(id):
-    print("\nFetching data of Patient ID: " + str(id))
-    patientId = id
-    dataDictionarySinglePerson = {}
-    url = 'http://covid19.sindhmonitoringcell.com/dashboard/patientDetails?id=' + str(patientId)
-    dataDictionarySinglePerson["patientId"] = patientId
-    htmlContent = s.get(url, headers=headers).text
-    soup = BeautifulSoup(htmlContent, "html.parser")
+    with requests.Session() as s:
+        print("\nFetching data of Patient ID: " + str(id))
+        patientId = id
+        dataDictionarySinglePerson = {}
+        url = 'http://covid19.sindhmonitoringcell.com/dashboard/patientDetails?id=' + str(patientId)
+        dataDictionarySinglePerson["patientId"] = patientId
+        htmlContent = s.get(url, headers=headers).text
+        soup = BeautifulSoup(htmlContent, "html.parser")
 
-    # getting patient details
-    divs = soup.find_all("div", attrs={"class": "row mgbt-xs-0"})
-    commorbity = []
-    for div in divs:
-        if div.label != None and div.div != None:
-            columnName = div.label.text
-            tempColumnValue = div.div.text
+        # getting patient details
+        divs = soup.find_all("div", attrs={"class": "row mgbt-xs-0"})
+        commorbity = []
+        for div in divs:
+            if div.label != None and div.div != None:
+                columnName = div.label.text
+                tempColumnValue = div.div.text
 
-            if columnName == "":
-                columnName = "Comorbidities"
-            columnValue = tempColumnValue[:tempColumnValue.find("Change")].strip() if tempColumnValue.find(
-                "Change") != -1 else tempColumnValue.strip()
+                if columnName == "":
+                    columnName = "comorbidities"
+                columnValue = tempColumnValue[:tempColumnValue.find("Change")].strip() if tempColumnValue.find(
+                    "Change") != -1 else tempColumnValue.strip()
 
-            if columnName == "Comorbidities":
-                commorbity.append(columnValue)
-                dataDictionarySinglePerson[columnName] = commorbity
-            else:
-                dataDictionarySinglePerson[columnName] = columnValue
+                if columnName == "comorbidities":
+                    commorbity.append(columnValue)
+                    dataDictionarySinglePerson[columnName] = commorbity
+                else:
+                    if columnName == "Full Name:":
+                        dataDictionarySinglePerson["full_name"] = columnValue
+                    elif columnName == "Father Name , W/O:":
+                        dataDictionarySinglePerson["father_husband"] = columnValue
+                    elif columnName == 'Contact :':
+                        dataDictionarySinglePerson["contact"] = columnValue
+                    elif columnName == 'CNIC :':
+                        dataDictionarySinglePerson["cnic"] = columnValue
+                    elif columnName == 'Age:':
+                        dataDictionarySinglePerson["age"] = columnValue
+                    elif columnName == 'Travel:':
+                        dataDictionarySinglePerson["travel"] = columnValue
+                    elif columnName == 'Date Diagnosed:':
+                        dataDictionarySinglePerson["diagnosed_date"] = columnValue
+                    elif columnName == 'Hospital:':
+                        dataDictionarySinglePerson["hospital"] = columnValue
+                    elif columnName == 'District:':
+                        dataDictionarySinglePerson["district"] = columnValue
+                    elif columnName == 'Town:':
+                        dataDictionarySinglePerson["town"] = columnValue
+                    elif columnName == 'Home Address:':
+                        dataDictionarySinglePerson["home_address"] = columnValue
+                    elif columnName == 'Current Residence:':
+                        dataDictionarySinglePerson["current_residence"] = columnValue
+                    elif columnName == 'Consulting Doctor:':
+                        dataDictionarySinglePerson["consulting_doctor"] = columnValue
+                    
+                    elif columnName == 'Doctor Contact:':
+                        dataDictionarySinglePerson["doctor_contact"] = columnValue
+                    elif columnName == 'Lab Name:':
+                        dataDictionarySinglePerson["lab"] = columnValue
+                    elif columnName == 'Reason for Test':
+                        dataDictionarySinglePerson["test_reason"] = columnValue
 
-    # getting patient status
-    status = soup.find("button", attrs={"class": "btn vd_btn vd_bg-linkedin"}).text
-    dataDictionarySinglePerson["status"] = status
+        # getting patient status
+        status = soup.find("button", attrs={"class": "btn vd_btn vd_bg-linkedin"}).text
+        dataDictionarySinglePerson["status"] = status
 
-    # getting dateNegative From test history data
-    historyTable = soup.find("table", attrs={"class": "table table-condensed table-bordered"})
-    historyTableRows = historyTable.tbody.find_all("tr")
-    for tr in historyTableRows:
-        tds = tr.find_all("td")
-        if tds[2].text == "Negative":
-            dateNegative = tds[1].text
-            dataDictionarySinglePerson["dateNegative"] = dateNegative
-            break
+        # getting dateNegative From test history data
+        historyTable = soup.find("table", attrs={"class": "table table-condensed table-bordered"})
+        historyTableRows = historyTable.tbody.find_all("tr")
+        for tr in historyTableRows:
+            tds = tr.find_all("td")
+            if tds[2].text == "Negative":
+                dateNegative = tds[1].text
+                dataDictionarySinglePerson["dateNegative"] = dateNegative
+                break
 
-    # getting patient followup details circle data
-    lis = soup.find_all("li", attrs={"class": "tl-item"})
-    followupArray = []
-    for li in lis:
-        timeDiv = li.find("div", attrs={"class": "tl-date"}).text
-        followupArray.append(timeDiv)
-    dataDictionarySinglePerson["followUpCircleData"] = followupArray
+        # getting patient followup details circle data
+        lis = soup.find_all("li", attrs={"class": "tl-item"})
+        followupArray = []
+        for li in lis:
+            timeDiv = li.find("div", attrs={"class": "tl-date"}).text
+            followupArray.append(timeDiv)
+        dataDictionarySinglePerson["followUpCircleData"] = followupArray
 
-    # getting patient followup details other data
-    lis = soup.find_all("li", attrs={"class": "tl-item"})
-    followupOtherArray = []
-    for li in lis:
-        otherDiv = li.find("div", attrs={"class": "tl-label"}).div.text
-        followupOtherArray.append(otherDiv.strip())
-    dataDictionarySinglePerson["followUpOtherData"] = followupOtherArray
+        # getting patient followup details other data
+        lis = soup.find_all("li", attrs={"class": "tl-item"})
+        followupOtherArray = []
+        for li in lis:
+            otherDiv = li.find("div", attrs={"class": "tl-label"}).div.text
+            followupOtherArray.append(otherDiv.strip())
+        dataDictionarySinglePerson["followUpOtherData"] = followupOtherArray
 
-    # getting test history data
-    historyTable = soup.find("table", attrs={"class": "table table-condensed table-bordered"})
-    historyTableRows = historyTable.tbody.find_all("tr")
-    historyTableArrayComplete = []
-    for tr in historyTableRows:
-        tdsRow = tr.find_all("td")
-        historyTableSingleRowData = ""
-        for index in range(len(tdsRow)):
-            if (tdsRow[index].text).strip() == "":
-                historyTableSingleRowData += "Null" + "*"
-            else:
-                historyTableSingleRowData += tdsRow[index].text + "*"
-        historyTableArrayComplete.append(historyTableSingleRowData)
-    dataDictionarySinglePerson["testHistoryData"] = historyTableArrayComplete
+        # getting test history data
+        historyTable = soup.find("table", attrs={"class": "table table-condensed table-bordered"})
+        historyTableRows = historyTable.tbody.find_all("tr")
+        historyTableArrayComplete = []
+        for tr in historyTableRows:
+            tdsRow = tr.find_all("td")
+            historyTableSingleRowData = []
+            for index in range(len(tdsRow)):
+                if (tdsRow[index].text).strip() == "":
+                    historyTableSingleRowData.append(tdsRow[index].text)
+                else:
+                    historyTableSingleRowData.append(tdsRow[index].text)
+            historyTableArrayComplete.append(historyTableSingleRowData)
+        dataDictionarySinglePerson["testHistoryData"] = historyTableArrayComplete
+        print(dataDictionarySinglePerson)
     return dataDictionarySinglePerson
 
-
+cookieId = "ci_session=9c3eevklbn3uevp966vh7c7m67ulb50d"
 headers = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
     "Accept-Encoding": "gzip, deflate",
@@ -96,36 +123,8 @@ headers = {
     "Upgrade-Insecure-Requests": "1",
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36",
 }
+
 # 1277, 1276, 102091,129441,3288
 # ci_session=9c3eevklbn3uevp966vh7c7m67ulb50d
-with requests.Session() as s:
-    isNotValidInput = True
-    while isNotValidInput:
-        try:
-            startPatientId = sys.argv[1]
-            endPatientId = sys.argv[2]
-            startPatientId = int(startPatientId)
-            endPatientId = int(endPatientId)
-            isNotValidInput = False
-        except:
-            print("\nEnter Valid Starting ID and Ending ID of patients!\n")
 
-    for id in range(startPatientId, endPatientId + 1):
-        singlePatientData = fetchPatientData(id)
-        if singlePatientData.get("Full Name:") == "" and singlePatientData.get(
-                "Father Name , W/O:") == "" and singlePatientData.get("Contact :") == "" and singlePatientData.get(
-                "CNIC :") == "":
-            print("Not Valid Patient ID!\nSkipping this ID.....")
-        else:
-            dataComplete.append(singlePatientData)
-
-    print("\nComplete Data Below:\n", dataComplete)
-
-# Write to file
-f = open("dataFrom"+str(startPatientId)+"to"+str(endPatientId)+".json", "w")
-f.write(json.dumps(dataComplete))
-f.close()
-
-df = pd.read_json("dataFrom"+str(startPatientId)+"to"+str(endPatientId)+".json")
-df.to_excel("dataFrom"+str(startPatientId)+"to"+str(endPatientId)+".xlsx", index = False)
-
+fetchPatientData(129441)
