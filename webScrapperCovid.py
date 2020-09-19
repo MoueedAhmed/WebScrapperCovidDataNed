@@ -3,7 +3,12 @@ from bs4 import BeautifulSoup
 import json
 import pandas as pd
 
+#-------------------------------------------------------fetchPatientData Start--------------------------------------------------------------------------#
 def fetchPatientData(id):
+    cookieId = "ci_session=9c3eevklbn3uevp966vh7c7m67ulb50d"
+    headers = {
+        "Cookie": cookieId
+    }
     with requests.Session() as s:
         print("\nFetching data of Patient ID: " + str(id))
         patientId = id
@@ -110,13 +115,15 @@ def fetchPatientData(id):
         dataDictionarySinglePerson["testHistoryData"] = historyTableArrayComplete
         print(dataDictionarySinglePerson)
     return dataDictionarySinglePerson
-
-cookieId = "ci_session=9c3eevklbn3uevp966vh7c7m67ulb50d"
-headers = {
-    "Cookie": cookieId
-}
+#-------------------------------------------------------fetchPatientData End--------------------------------------------------------------------------#
 
 # 1277, 1276, 102091,129441,3288
 # ci_session=9c3eevklbn3uevp966vh7c7m67ulb50d
+#---------------------------------------------------------------Main Start------------------------------------------------------------------------------#
 
+#getting data
 fetchPatientData(129441)
+
+
+
+#---------------------------------------------------------------Main End------------------------------------------------------------------------------#
