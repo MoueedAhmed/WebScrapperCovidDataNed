@@ -1,5 +1,9 @@
-from pony.orm import * 
+from pony.orm import Database, Optional, PrimaryKey, set_sql_debug, db_session
 from datetime import datetime
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 set_sql_debug(True)
 db = Database()
@@ -24,7 +28,7 @@ class Patient(db.Entity):
     test_reason = Optional(str)
     status = Optional(str)
 
-db.bind(provider='mysql', host='database-free-tier.c1g6uvkv8o2l.us-east-2.rds.amazonaws.com', user='admin', passwd='Mysqlid1', db='covid19')
+db.bind(provider=os.getenv("PROVIDER"), host=os.getenv("HOST"), user=os.getenv("USERDB"), passwd=os.getenv("PASSWD"), db=os.getenv("DB"))
 db.generate_mapping(create_tables=True)
 
 @db_session
