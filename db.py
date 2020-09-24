@@ -1,4 +1,4 @@
-from pony.orm import Database, Optional, PrimaryKey, set_sql_debug, db_session
+from pony.orm import Database, Optional, PrimaryKey, set_sql_debug, db_session, commit
 from datetime import datetime
 from dotenv import load_dotenv
 import os

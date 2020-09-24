@@ -21,6 +21,7 @@ def fetchPatientData(id):
         # getting patient details
         divs = soup.find_all("div", attrs={"class": "row mgbt-xs-0"})
         commorbity = []
+        dataDictionarySinglePerson["comorbidities"] = []
         for div in divs:
             if div.label != None and div.div != None:
                 columnName = div.label.text
