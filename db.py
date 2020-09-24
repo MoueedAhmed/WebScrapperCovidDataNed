@@ -34,6 +34,27 @@ class PatientComorbidities(db.Entity):
     patientId = Optional(int)
     comorbidity = Optional(str)
 
+class PatientFollowUpCircleData(db.Entity):
+    _table_ = "patient_followup_circledata"
+    patientId = Optional(int)
+    circle = Optional(str)
+
+class PatientFollowUpOtherData(db.Entity):
+    _table_ = "patient_followup_otherdata"
+    patientId = Optional(int)
+    other = Optional(str)
+
+class PatientTestHistoryData(db.Entity):
+    _table_ = "patient_test_history_data"
+    patientId = Optional(int)
+    sno = Optional(str)
+    test_date = Optional(str)
+    result = Optional(str)
+    lab = Optional(str)
+    remarks = Optional(str)
+    updated_by = Optional(str)
+    option = Optional(str)
+
 db.bind(provider=os.getenv("PROVIDER"), host=os.getenv("HOST"), user=os.getenv("USERDB"), passwd=os.getenv("PASSWD"), db=os.getenv("DB"))
 db.generate_mapping(create_tables=True)
 
@@ -47,4 +68,16 @@ def add_patient_basic(patientId, full_name, father_husband, contact, cnic, age, 
 @db_session
 def add_patient_comorbidities(patientId, comorbidity):
     PatientComorbidities(patientId=patientId, comorbidity=comorbidity)
+
+@db_session
+def add_patient_followup_circledata(patientId, circle):
+    PatientFollowUpCircleData(patientId=patientId, circle=circle)
+
+@db_session
+def add_patient_followup_otherdata(patientId, other):
+    PatientFollowUpOtherData(patientId=patientId, other=other)
+
+@db_session
+def add_patient_test_history_data(patientId, sno, test_date, result, lab, remarks, updated_by, option):
+    PatientTestHistoryData(patientId=patientId, sno=sno, test_date=test_date, result=result, lab=lab, remarks=remarks, updated_by=updated_by, option=option)
 
